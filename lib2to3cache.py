@@ -14,6 +14,7 @@ import os
 import os
 import shutil
 import hashlib
+import tempfile
 import lib2to3.refactor
 
 # cache location
@@ -97,14 +98,17 @@ def do_monkeypatch():
             output = str(tree)
 
             # put to cache
-            f = open(cache_file + '.new', 'wb')
+            tmp_fd, tmp_fn = tempfile.mkstemp(dir=CACHE_DIR, suffix='.new')
+            os.close(tmp_fd)
+
+            f = open(tmp_fn, 'wb')
             if was_changed:
                 f.write(asbytes('y\n'))
             else:
                 f.write(asbytes('n\n'))
             f.write(output.encode(CACHE_ENCODING))
             f.close()
-            shutil.move(cache_file + '.new', cache_file)
+            shutil.move(tmp_fn, cache_file)
 
         return DummyTree(output, was_changed)
 
