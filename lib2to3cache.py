@@ -118,7 +118,7 @@ def do_monkeypatch():
             tmp_fd, tmp_fn = tempfile.mkstemp(dir=CACHE_DIR, suffix='.new')
             os.close(tmp_fd)
 
-            f = gzip.open(tmp_fn, 'wb', compresslevel=3)
+            f = gzip.open(tmp_fn, 'wb')
             if was_changed:
                 f.write(asbytes('y\n'))
             else:
