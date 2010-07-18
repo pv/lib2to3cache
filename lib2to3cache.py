@@ -15,6 +15,7 @@ import os
 import shutil
 import hashlib
 import tempfile
+import gzip
 import lib2to3.refactor
 
 # cache location
@@ -100,7 +101,7 @@ def do_monkeypatch():
         cache_file = os.path.join(CACHE_DIR, digest)
         if os.path.isfile(cache_file):
             # fetch from cache
-            f = open(cache_file, 'rb')
+            f = gzip.open(cache_file, 'rb')
             header = f.readline()
             was_changed = (header == asbytes('y\n'))
             output = f.read().decode(CACHE_ENCODING)
@@ -117,7 +118,7 @@ def do_monkeypatch():
             tmp_fd, tmp_fn = tempfile.mkstemp(dir=CACHE_DIR, suffix='.new')
             os.close(tmp_fd)
 
-            f = open(tmp_fn, 'wb')
+            f = gzip.open(tmp_fn, 'wb', compresslevel=3)
             if was_changed:
                 f.write(asbytes('y\n'))
             else:
