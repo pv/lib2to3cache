@@ -117,3 +117,7 @@ def do_monkeypatch():
     lib2to3.refactor.RefactoringTool.refactor_file = new_refactor_file
 
 do_monkeypatch()
+
+def main():
+    from lib2to3.main import main
+    return main("lib2to3.fixes")

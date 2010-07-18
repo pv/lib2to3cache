@@ -11,12 +11,6 @@ License: Public Domain
 Library:
     Modules: lib2to3cache
 
-DataFiles: executable
-    TargetDir: $bindir
-    SourceDir: .
-    Files:
-        2to3cache
-
-ExtraSourceFiles:
-    README.rst,
-    setup.py
+Executable: main
+    Function: main
+    Module: lib2to3cache
