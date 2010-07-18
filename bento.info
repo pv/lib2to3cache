@@ -1,0 +1,19 @@
+Name: lib2to3cache
+Version: 0.1
+Description:
+    This module monkeypatches lib2to3 to cache its results, often
+    significantly reducing the time taken by repeated 2 to 3 translations
+    of Python code.
+
+Library:
+    Modules: lib2to3cache
+
+DataFiles: executable
+    TargetDir: $bindir
+    SourceDir: .
+    Files:
+        2to3cache
+
+ExtraSourceFiles:
+    README.rst,
+    setup.py
