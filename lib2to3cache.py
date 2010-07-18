@@ -18,14 +18,24 @@ import shutil
 import hashlib
 import lib2to3.refactor
 
-if sys.version_info[0] < 3:
-    raise RuntimeError("This module is only for Python 3")
-
 # cache location
 CACHE_DIR = os.path.expanduser("~/.2to3cache")
 
 # size of cache
 MAX_CACHED_FILES = 10000
+
+# cache encoding
+CACHE_ENCODING = 'utf-8'
+
+# Python 2 vs Python 3 compatibility
+if sys.version_info[0] < 3:
+    bytes = str
+    asbytes = lambda x: x
+else:
+    unicode = str
+    asbytes = lambda x: x.encode('latin1')
+
+# Perform the monkeypatching
 
 def do_monkeypatch():
     if not os.path.isdir(CACHE_DIR):
@@ -54,7 +64,7 @@ def do_monkeypatch():
     old_refactor_file = lib2to3.refactor.RefactoringTool.refactor_file
 
     def new_refactor_string(self, input, name):
-        digest = hashlib.sha1(input.encode('utf-8'))
+        digest = hashlib.sha1(input.encode(CACHE_ENCODING))
 
         # the files present in the same directory may affect the result
         # of refactoring -- cf. fixes/fix_import.py in 2to3
@@ -65,17 +75,20 @@ def do_monkeypatch():
             for fn in sorted(os.listdir(path)):
                 ext = os.path.splitext(fn)[1]
                 if ext in ['.py', '.pyc', '.so', '.sl', '.pyd']:
-                    digest.update(fn.encode('utf-8'))
-                    digest.update(b'\0')
+                    fn = fn + '\0'
+                    if isinstance(fn, unicode):
+                        fn = fn.encode(CACHE_ENCODING)
+                    digest.update(fn)
 
         digest = digest.hexdigest()
-        
+
         cache_file = os.path.join(CACHE_DIR, digest)
         if os.path.isfile(cache_file):
             # fetch from cache
-            f = open(cache_file, 'r', encoding='utf-8')
-            was_changed = (f.readline() == 'y\n')
-            output = f.read()
+            f = open(cache_file, 'rb')
+            header = f.readline()
+            was_changed = (header == asbytes('y\n'))
+            output = f.read().decode(CACHE_ENCODING)
             f.close()
             # update cache file mtime
             os.utime(cache_file, None)
@@ -86,12 +99,12 @@ def do_monkeypatch():
             output = str(tree)
 
             # put to cache
-            f = open(cache_file + '.new', 'w', encoding='utf-8')
+            f = open(cache_file + '.new', 'wb')
             if was_changed:
-                f.write('y\n')
+                f.write(asbytes('y\n'))
             else:
-                f.write('n\n')
-            f.write(output)
+                f.write(asbytes('n\n'))
+            f.write(output.encode(CACHE_ENCODING))
             f.close()
             shutil.move(cache_file + '.new', cache_file)
 
