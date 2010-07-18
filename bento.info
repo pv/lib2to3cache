@@ -4,6 +4,9 @@ Description:
     This module monkeypatches lib2to3 to cache its results, often
     significantly reducing the time taken by repeated 2 to 3 translations
     of Python code.
+Author: Pauli Virtanen
+AuthorEmail: pav@iki.fi
+License: Public Domain
 
 Library:
     Modules: lib2to3cache
