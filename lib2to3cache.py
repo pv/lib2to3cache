@@ -3,13 +3,11 @@ lib2to3cache
 ============
 
 :author: Pauli Virtanen <pav@iki.fi>
+:license: Public domain
 
-Module that modifies lib2to3 to cache its results, significantly
-reducing the time taken by repeated 2 to 3 translation of Python code.
+Monkeypatch lib2to3 to cache its results in ~/.2to3cache
 
 """
-
-# This code is in the public domain. Do whatever you wish with it.
 
 import sys
 import os
@@ -47,7 +45,7 @@ def do_monkeypatch():
         except:
             return 0.0
 
-    files = os.listdir(CACHE_DIR)
+    files = [os.path.join(CACHE_DIR, fn) for fn in os.listdir(CACHE_DIR)]
     if len(files) > MAX_CACHED_FILES:
         files.sort(key=file_mtime)
         for fn in files[:-MAX_CACHED_FILES]:
