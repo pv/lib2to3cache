@@ -65,6 +65,11 @@ def do_monkeypatch():
     def new_refactor_string(self, input, name):
         digest = hashlib.sha1(input.encode(CACHE_ENCODING))
 
+        def feed_digest(s):
+            if isinstance(s, unicode):
+                digest.update(s.encode(CACHE_ENCODING))
+            digest.update(s)
+
         # the files present in the same directory may affect the result
         # of refactoring -- cf. fixes/fix_import.py in 2to3
         #
@@ -74,11 +79,21 @@ def do_monkeypatch():
             for fn in sorted(os.listdir(path)):
                 ext = os.path.splitext(fn)[1]
                 if ext in ['.py', '.pyc', '.so', '.sl', '.pyd']:
-                    fn = fn + '\0'
-                    if isinstance(fn, unicode):
-                        fn = fn.encode(CACHE_ENCODING)
-                    digest.update(fn)
+                    feed_digest(fn + '\0')
 
+        # also fixers and options must be taken into account
+        feed_digest('\0')
+        for f in sorted(self.fixers):
+            feed_digest(f + '\0')
+        feed_digest('\0')
+        for f in sorted(self.explicit):
+            feed_digest(f + '\0')
+        feed_digest('\0')
+        for k, v in sorted(self.options.items()):
+            feed_digest(k + '\0')
+            feed_digest(repr(v) + '\0')
+
+        # finish digesting
         digest = digest.hexdigest()
 
         cache_file = os.path.join(CACHE_DIR, digest)
