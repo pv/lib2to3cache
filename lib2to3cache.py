@@ -68,7 +68,8 @@ def do_monkeypatch():
         def feed_digest(s):
             if isinstance(s, unicode):
                 digest.update(s.encode(CACHE_ENCODING))
-            digest.update(s)
+            else:
+                digest.update(s)
 
         # the files present in the same directory may affect the result
         # of refactoring -- cf. fixes/fix_import.py in 2to3
