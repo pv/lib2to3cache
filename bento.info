@@ -14,3 +14,8 @@ Library:
 Executable: main
     Function: main
     Module: lib2to3cache
+
+ExtraSourceFiles:
+    README.rst,
+    2to3cache,
+    setup.py
